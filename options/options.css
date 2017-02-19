@@ -1,0 +1,30 @@
+textarea, fieldset, button {
+  margin: 5px 2px;
+}
+textarea {
+  margin-top: 12px;
+  width: calc(100% - 8px);
+  display: block;
+}
+fieldset > legend {
+  font-weight: bold;
+  font-size: 0.8rem;
+}
+button {
+  margin-top: 14px;
+  display: block;
+  font-weight: bold;
+}
+aside {
+  color: red;
+  font-size: 0.8rem;
+  font-style: italic;
+  padding-top: 4px;
+  display: none;
+}
+small {
+  font-style: italic;
+}
+.visible {
+  display: block;
+}
