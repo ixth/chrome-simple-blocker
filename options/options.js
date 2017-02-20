@@ -1,6 +1,6 @@
 "use strict";
 
-let background = browser.extension.getBackgroundPage();
+let background = chrome.extension.getBackgroundPage();
 
 document.addEventListener('DOMContentLoaded', function () {
     background.retrieve().then((data) => {

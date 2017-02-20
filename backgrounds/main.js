@@ -35,12 +35,12 @@ function updateCacheVar(strRegexArray, lmode, ldebug) {
 }
 
 function save(stringRegexes, lmode, ldebug) {
-    browser.storage.local.get("simpleBlocker").then((data) => {
+    chrome.storage.local.get("simpleBlocker").then((data) => {
         data = normalizeData(data);
         data.simpleBlocker.regexes = stringRegexes;
         data.simpleBlocker.mode = lmode;
         data.simpleBlocker.debug = ldebug;
-        browser.storage.local.set(data);
+        chrome.storage.local.set(data);
         updateCacheVar(
           stringRegexes.split(/\r?\n/),
           lmode,
@@ -50,7 +50,7 @@ function save(stringRegexes, lmode, ldebug) {
 }
 
 function retrieve() {
-    return browser.storage.local.get("simpleBlocker").then((data) => {
+    return chrome.storage.local.get("simpleBlocker").then((data) => {
         data = normalizeData(data);
         updateCacheVar(
           data.simpleBlocker.regexes.split(/\r?\n/),
@@ -79,7 +79,7 @@ function filterRequest(request) {
     return { cancel: cancel };
 }
 
-browser.storage.local.get("simpleBlocker").then((data) => {
+chrome.storage.local.get("simpleBlocker").then((data) => {
     data = normalizeData(data);
     updateCacheVar(
       data.simpleBlocker.regexes.split(/\r?\n/),
@@ -87,10 +87,10 @@ browser.storage.local.get("simpleBlocker").then((data) => {
       data.simpleBlocker.debug
       );
 
-    //browser.storage.local.remove("simpleBlocker")
+    //chrome.storage.local.remove("simpleBlocker")
 });
 
-browser.webRequest.onBeforeRequest.addListener(
+chrome.webRequest.onBeforeRequest.addListener(
     filterRequest,
     {urls: ["<all_urls>"]},
     ["blocking"]
