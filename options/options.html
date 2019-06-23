@@ -1,41 +1,42 @@
 <!DOCTYPE html>
 <html>
-  <head>
-    <meta charset="utf-8">
-  </head>
-  <link rel="stylesheet" href="options.css"/>
-<body>
-  <form>
-    <fieldset>
-      <legend>Debug</legend>
-      <label>
-        <input type="radio" name="debugging" value="0" checked>No
-      </label>
-      <label>
-        <input type="radio" name="debugging" value="1">Yes
-      </label>
-    </fieldset>
-    <fieldset>
-      <legend>Filter Mode</legend>
-      <label>
-        <input type="radio" name="mode" value="0" checked>Blacklist
-      </label>
-      <label>
-        <input type="radio" name="mode" value="1">Whitelist
-      </label>
-    </fieldset>
-    <fieldset>
-      <legend>Filter List</legend>
-      <textarea id="regexes" rows="10" placeholder="Example: https?://.*\.google(-|s).+\.(com|net)/.*$"></textarea>
-      <small>Regular expressions separated by newline. For details of Firefox's regular expression see
-        <a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Guide/Regular_Expressions#Using_Special_Characters"
-          target="_blank" rel="noopener noreferrer">MDN document</a>
-      </small>
-    </fieldset>
-    <button id="submit" type="submit">Apply</button>
-    <aside>Filter has been updated</aside>
-  </form>
-  <script src="options.js"></script>
-</body>
-
+    <head>
+        <meta charset="utf-8">
+        <link rel="stylesheet" href="options.css"/>
+    </head>
+    <body>
+        <form id="settings">
+            <fieldset>
+                <legend>Filter Mode</legend>
+                <p>
+                    <label>
+                        <input type="radio" name="mode" value="BLACKLIST" checked />
+                        Blacklist
+                    </label>
+                    <label>
+                        <input type="radio" name="mode" value="WHITELIST" />
+                        Whitelist
+                    </label>
+                </p>
+            </fieldset>
+            <fieldset>
+                <legend>Filter List</legend>
+                <p>
+                    <textarea name="rules" rows="10" placeholder="Example: https?://.*\.google(-|s).+\.(com|net)/.*$"></textarea>
+                </p>
+                <p>
+                    <span class="footnote">
+                        Regular expressions separated by&nbsp;newline.<br />
+                        For details of&nbsp;Firefox's regular expression see
+                        <a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Guide/Regular_Expressions#Using_Special_Characters"
+                           target="_blank" rel="noopener noreferrer">MDN document</a>
+                    </span>
+                </p>
+            </fieldset>
+            <div class="controls">
+                <button type="submit" disabled>Apply</button>
+            </div>
+        </form>
+        <script src="options.js"></script>
+    </body>
 </html>

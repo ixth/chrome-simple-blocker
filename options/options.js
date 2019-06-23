@@ -1,24 +1,47 @@
-"use strict";
+'use strict';
 
-let background = chrome.extension.getBackgroundPage();
+const { store, validate } = chrome.extension.getBackgroundPage();
 
-document.addEventListener('DOMContentLoaded', function () {
-    background.retrieve().then((data) => {
-      document.querySelector('#regexes').value = data.regexes;
-      document.querySelector('input[name="mode"][value="' + data.mode + '"]').checked = true;
-      document.querySelector('input[name="debugging"][value="' + data.debug + '"]').checked = true;
-    });
-});
+const form = document.querySelector('#settings');
+const submit = form.querySelector('[type="submit"]');
 
-document.querySelector('#regexes').addEventListener('keydown', function (e) {
-    document.querySelector('aside').classList.remove('visible');
-});
+const onChange = ({ mode, rules }) => {
+    if (rules) {
+        form.elements.rules.value = rules.join('\n');
+    }
+    if (mode) {
+        form.elements.mode.value = mode;
+    }
+};
 
-document.querySelector('#submit').addEventListener('click', function (e) {
+store.init().then(onChange);
+store.onChange(onChange);
+
+form.addEventListener('submit', (e) => {
     e.preventDefault();
-    background.save(document.querySelector('#regexes').value,
-      document.querySelector('input[name="mode"]:checked').value,
-      document.querySelector('input[name="debugging"]:checked').value
-      );
-    document.querySelector('aside').classList.add('visible');
+
+    const nextStore = {
+        rules: form.elements.rules.value.split(/\r|\n/g),
+        mode: form.elements.mode.value,
+    };
+
+    const errors = validate(nextStore);
+
+    if (errors.length) {
+        errors.forEach((e) => console.error(e));
+        return;
+    }
+
+    store.set(nextStore);
+    submit.disabled = true;
+});
+
+const addEventListener = (type, listener) => {
+    type.split(' ').forEach((type) => {
+        form.addEventListener(type.trim(), listener);
+    });
+};
+
+addEventListener('input change', () => {
+    submit.disabled = false;
 });

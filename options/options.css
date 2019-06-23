@@ -1,30 +1,45 @@
-textarea, fieldset, button {
-  margin: 5px 2px;
+fieldset, legend {
+    margin: 0;
+    padding: 0;
 }
+
+body {
+    font-family: '.SFNSDisplay-Regular', 'Helvetica Neue', 'Lucida Grande', sans-serif;
+}
+
+fieldset {
+    border: none;
+}
+
+    fieldset > legend {
+        font-size: 14px;
+    }
+
+    fieldset > p {
+        padding-left: 20px;
+    }
+
+label + label {
+    margin-left: 1ex;
+}
+
+
 textarea {
-  margin-top: 12px;
-  width: calc(100% - 8px);
-  display: block;
+    display: block;
+    width: 100%;
+    font: normal 12px monospace;
 }
-fieldset > legend {
-  font-weight: bold;
-  font-size: 0.8rem;
+
+input[type="radio"] {
+    vertical-align: text-bottom;
 }
-button {
-  margin-top: 14px;
-  display: block;
-  font-weight: bold;
+
+.footnote {
+    font-style: italic;
 }
-aside {
-  color: red;
-  font-size: 0.8rem;
-  font-style: italic;
-  padding-top: 4px;
-  display: none;
-}
-small {
-  font-style: italic;
-}
-.visible {
-  display: block;
+
+.controls {
+    display: flex;
+    align-items: baseline;
+    justify-content: flex-end;
 }

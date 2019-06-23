@@ -1,97 +1,113 @@
-"use strict";
+const MODES = {
+    BLACKLIST: 'BLACKLIST',
+    WHITELIST: 'WHITELIST',
+};
 
-var debug = false;
-var mode = 0;
+const CachedStorage = (namespace, initial) => {
+    let cache = initial;
 
-let regexes = [];
+    const init = () =>
+        new Promise((resolve) => {
+            chrome.storage.local.get(
+                {
+                    [namespace]: initial,
+                },
+                (storage) => {
+                    cache = {
+                        ...cache,
+                        ...storage[namespace],
+                    };
+                    resolve(cache);
+                }
+            )
+        });
 
-function normalizeData(data) {
-    if (!data.simpleBlocker) {
-        data = {
-            simpleBlocker: {
-                regexes: '',
-                debug: debug,
-                mode: mode
+    const get = () => cache;
+
+    const set = (data) =>
+        new Promise((resolve) => {
+            chrome.storage.local.set(
+                {
+                    [namespace]: {
+                        ...cache,
+                        ...data,
+                    }
+                },
+                resolve
+            );
+        });
+
+    const onChange = (listener) =>
+        chrome.storage.local.onChanged.addListener((changes) => {
+            if (!changes[namespace]) {
+                return;
             }
+            listener(changes[namespace].newValue);
+        });
+
+    onChange((changes) => {
+        cache = {
+            ...cache,
+            ...changes,
         };
-    }
-
-    return data;
-}
-
-function updateCacheVar(strRegexArray, lmode, ldebug) {
-    mode = lmode;
-    debug = ldebug;
-    regexes = [];
-    for (let r of strRegexArray) {
-        if (r) {
-            try {
-              regexes.push(new RegExp(r));
-            } catch(e) {
-              // silent
-            }
-        }
-    }
-}
-
-function save(stringRegexes, lmode, ldebug) {
-    chrome.storage.local.get("simpleBlocker").then((data) => {
-        data = normalizeData(data);
-        data.simpleBlocker.regexes = stringRegexes;
-        data.simpleBlocker.mode = lmode;
-        data.simpleBlocker.debug = ldebug;
-        chrome.storage.local.set(data);
-        updateCacheVar(
-          stringRegexes.split(/\r?\n/),
-          lmode,
-          ldebug
-          );
     });
-}
 
-function retrieve() {
-    return chrome.storage.local.get("simpleBlocker").then((data) => {
-        data = normalizeData(data);
-        updateCacheVar(
-          data.simpleBlocker.regexes.split(/\r?\n/),
-          data.simpleBlocker.mode,
-          data.simpleBlocker.debug
-          );
+    return {
+        init,
+        get,
+        set,
+        onChange,
+    };
+};
 
-        return data.simpleBlocker;
-    });
-}
-
-function filterRequest(request) {
-    let cancel = false;
-    for (let regex of regexes) {
-      if ((mode == '0' && regex.test(request.url)) ||
-          (mode == '1' && !regex.test(request.url))
-      ) {
-        if (debug == '1') {
-          console.log("Canceled request: " + request.url);
-        }
-        cancel = true;
-        break;
-      }
-    }
-
-    return { cancel: cancel };
-}
-
-chrome.storage.local.get("simpleBlocker").then((data) => {
-    data = normalizeData(data);
-    updateCacheVar(
-      data.simpleBlocker.regexes.split(/\r?\n/),
-      data.simpleBlocker.mode,
-      data.simpleBlocker.debug
-      );
-
-    //chrome.storage.local.remove("simpleBlocker")
+const store = CachedStorage('simpleBlocker', {
+    mode: MODES.BLACKLIST,
+    rules: [],
 });
 
-chrome.webRequest.onBeforeRequest.addListener(
-    filterRequest,
-    {urls: ["<all_urls>"]},
-    ["blocking"]
+const validators = {
+    mode: (mode) =>
+        Object.values(MODES).includes(mode)
+            ? []
+            : [ new Error(`${mode} is invalid mode value`) ],
+
+    rules: (rules) =>
+        rules.reduce((errors, rule) => {
+            try {
+                new RegExp(rule);
+                return errors;
+            } catch (e) {
+                return [ ...errors, e ];
+            }
+        }, [])
+};
+
+const validate = (data) =>
+    Object.entries(data).reduce((errors, [key, value]) => ([ ...errors, ...validators[key](value) ]), []);
+
+
+const filter = ({ url }) => {
+    const { rules, mode } = store.get();
+    const compiledRules = rules
+        .filter((rule) => rule.trim())
+        .map((rule) => new RegExp(rule));
+    const matches = compiledRules.some((rule) => rule.test(url));
+    return {
+        cancel: mode === MODES.WHITELIST ? !matches : matches,
+    };
+};
+
+store.init().then(
+    () => {
+        chrome.webRequest.onBeforeRequest.addListener(
+            filter,
+            { urls: ['<all_urls>'] },
+            ['blocking']
+        );
+    },
+    (e) => {
+        console.error(e)
+    }
 );
+
+Object.assign(window, { store, validate });

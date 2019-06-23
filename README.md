@@ -1,1 +1,1 @@
-# firefox-simple-blocker
+# chrome-simple-blocker
