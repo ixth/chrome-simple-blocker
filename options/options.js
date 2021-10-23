@@ -1,6 +1,6 @@
 'use strict';
 
-const { store, validate } = chrome.extension.getBackgroundPage();
+const { store, validate } = browser.extension.getBackgroundPage();
 
 const form = document.querySelector('#settings');
 const submit = form.querySelector('[type="submit"]');

@@ -8,7 +8,7 @@ const CachedStorage = (namespace, initial) => {
 
     const init = () =>
         new Promise((resolve) => {
-            chrome.storage.local.get(
+            browser.storage.local.get(
                 {
                     [namespace]: initial,
                 },
@@ -26,7 +26,7 @@ const CachedStorage = (namespace, initial) => {
 
     const set = (data) =>
         new Promise((resolve) => {
-            chrome.storage.local.set(
+            browser.storage.local.set(
                 {
                     [namespace]: {
                         ...cache,
@@ -38,8 +38,8 @@ const CachedStorage = (namespace, initial) => {
         });
 
     const onChange = (listener) =>
-        chrome.storage.local.onChanged.addListener((changes) => {
-            if (!changes[namespace]) {
+            browser.storage.onChanged.addListener((changes, areaName) => {
+            if (areaName !== 'local' || !changes[namespace]) {
                 return;
             }
             listener(changes[namespace].newValue);
@@ -99,7 +99,7 @@ const filter = ({ url }) => {
 
 store.init().then(
     () => {
-        chrome.webRequest.onBeforeRequest.addListener(
+        browser.webRequest.onBeforeRequest.addListener(
             filter,
             { urls: ['<all_urls>'] },
             ['blocking']
